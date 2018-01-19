@@ -28,9 +28,9 @@ $(document).ready(function() {
                     for (var i = 0; i < indices.length; i++) {
                         styled_subtitle_text += subtitle_text.substring(start_index, indices[i]);
                         if (i == 0) {
-                            styled_subtitle_text += '<span id="firstFind" style="background-color:#1446D4;color:white">' + subtitle_text.substring(indices[i], indices[i] + search_field.length) + '</span>';
+                            styled_subtitle_text += '<span id="firstFind" style="background-color:#FF3366;color:#F6F7F8">' + subtitle_text.substring(indices[i], indices[i] + search_field.length) + '</span>';
                         } else {
-                            styled_subtitle_text += '<span style="background-color:#1446D4;color:white">' + subtitle_text.substring(indices[i], indices[i] + search_field.length) + '</span>';
+                            styled_subtitle_text += '<span style="background-color:#FF3366;color:#F6F7F8">' + subtitle_text.substring(indices[i], indices[i] + search_field.length) + '</span>';
                         }
                         start_index = indices[i] + search_field.length;
                     }
@@ -42,7 +42,7 @@ $(document).ready(function() {
                     }, 'slow');
                     return false;
                 } else {
-                    $("input").css('outline-color', '#E52611');
+                    $("input").css('outline-color', '#FF3366');
                 }
             }
         }
@@ -50,7 +50,24 @@ $(document).ready(function() {
     $('body').on('click', '#submit_button', function() {
         console.log('clicked');
         console.log(selectedText);
-        $.ajax({type: 'POST', url: 'https://audionotes.herokuapp.com/saveNoteRequest', data: selectedText, success: noteSaved, dataType: 'text'});
+        if(selectedText.length>0) {
+          $.ajax({type: 'POST', url: 'https://audionotes.herokuapp.com/saveNoteRequest', data: selectedText, success: noteSaved, dataType: 'text'});
+          selectedText = "";
+          $("#submit_button").removeClass("normal_button").addClass("feedback_button");
+          $("#submit_button").html("Note Added");
+          setTimeout(function(){
+            $("#submit_button").removeClass("feedback_button").addClass("normal_button");
+            $("#submit_button").html("Add to notes");
+          }, 1000);
+        }
+        else {
+          $("#submit_button").removeClass("normal_button").addClass("negative_feedback_button");
+          $("#submit_button").html("Nothing Selected");
+          setTimeout(function(){
+            $("#submit_button").removeClass("negative_feedback_button").addClass("normal_button");
+            $("#submit_button").html("Add to notes");
+          }, 1000);
+        }
     })
     if (!window.x) {
         x = {};
@@ -83,8 +100,8 @@ function urlPosted(res) {
     $('#loading').remove();
     var subtitle_text = JSON.parse(res).subtitle_text;
     if (subtitle_text != 'no subtitles found for this video') {
-        $('#container').append('<input id="text_search" type="text" placeholder="search subtitle text" required>');
-        $('body').append('<div id="submit_button">Add to notes</div>');
+        $('#container').append('<input id="text_search" type="text" placeholder="search subtitle text">');
+        $('body').append('<div id="submit_button" class="normal_button">Add to notes</div>');
     }
     $('#container').append('<p id="subtitle_text">' + subtitle_text + '</p>');
 }
